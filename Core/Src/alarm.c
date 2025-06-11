@@ -14,6 +14,9 @@ static volatile uint8_t alarm_status=0;
 static uint32_t touch_last_call;
 
 
+
+
+
 void AlarmInit(void){
 	touch_last_call=HAL_GetTick();
 }
@@ -39,6 +42,12 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
     }
 }
 
+/*
+ * Returns
+ * 0 if alarm OFF
+ * 1 if alarm ON
+ * 2 if alarm ON and MOVEMENT DETECTED
+ * */
 uint8_t getAlarmStatus(void){
-	return alarm_status & alarm_movement;
+	return alarm_status + (alarm_movement & alarm_status);
 }

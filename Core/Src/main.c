@@ -28,6 +28,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include "alarm.h"
+#include "display.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -92,25 +93,37 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USART2_UART_Init();
-  MX_I2C3_Init();
   MX_TIM2_Init();
+  MX_I2C2_Init();
   /* USER CODE BEGIN 2 */
 
   __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_2, 20);
   AlarmInit();
   HAL_GPIO_WritePin(GPIOB, GPIO_PIN_13, 0);
+  display_init();
+  display_show(DISPLAY_INIT);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	if (getAlarmStatus()){
+	  uint8_t status=getAlarmStatus();
+	if (status==2){ //ALARM ON + Movement
 		HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2);
+		display_show(DISPLAY_MOTION_DETECTED);
 	}
-	else
+	else if (status==1) // ALARM ON
 	{
 		HAL_TIM_PWM_Stop(&htim2, TIM_CHANNEL_2);
+		display_show(DISPLAY_ALARM_ON);
+	}
+	else {
+		// ALARM OFF
+		HAL_TIM_PWM_Stop(&htim2, TIM_CHANNEL_2);
+		display_show(DISPLAY_ALARM_OFF);
+
+
 	}
 	HAL_Delay(100);
     /* USER CODE END WHILE */
